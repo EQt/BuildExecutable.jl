@@ -184,7 +184,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
             @static if is_linux()
                 run(`$(patchelf) --set-rpath \$ORIGIN/ $(joinpath(targetdir, shlib))`)
             end
-            @static if is_osx()
+            @static if is_apple()
                 # For debug purpose
                 #println(readall(`otool -L $(joinpath(targetdir, shlib))`)[1:end-1])
                 #println("sys.buildfile=",sys.buildfile)
