@@ -71,19 +71,29 @@ function build_sysimg(sysimg_path=nothing, cpu_target="native",
             cp(userimg_path, "userimg.jl")
         end
         try
+            function juliac(output::String, cmd::Cmd)
+                if isfile("$output.ji") && isfile("$output.o")
+                    info("$output already created")
+                else
+                    cmd = `$julia -C $cpu_target --output-ji $output.ji --output-o $output.o $cmd`
+                    printrun(cmd)
+                end
+            end
+            
+
             # Start by building inference0.{ji,o}
             inference0_path = joinpath(dirname(sysimg_path), "inference0")
             info("Building inference0.o...")
-            printrun(`$julia -C $cpu_target --output-ji $inference0_path.ji --output-o $inference0_path.o coreimg.jl`)
+            juliac(inference0_path, `coreimg.jl`)
 
             # Bootstrap off off that to create inference.{ji,o}
             inference_path = joinpath(dirname(sysimg_path), "inference")
             info("Building inference.o...")
-            printrun(`$julia -C $cpu_target --output-ji $inference_path.ji --output-o $inference_path.o coreimg.jl`)
+            juliac(inference_path, `coreimg.jl`)
 
             # Bootstrap off off that to create sys.{ji,o}
             info("Building sys.o...")
-            printrun(`$julia -C $cpu_target --output-ji $sysimg_path.ji --output-o $sysimg_path.o -J $inference_path.ji --startup-file=no sysimg.jl`)
+            juliac(sysimg_path, `-J $inference_path.ji --startup-file=no sysimg.jl`)
 
             if cc != nothing
                 link_sysimg(sysimg_path, cc, debug)
@@ -145,7 +155,7 @@ function find_system_compiler()
     warn( "No supported compiler found; startup times will be longer" )
 end
 
-"""Link sys.o into sys.$(dlext)"""
+"""Link sys.o into sys.$(Libdl.dlext)"""
 function link_sysimg(sysimg_path=nothing, cc=find_system_compiler(), debug=false)
     if sysimg_path == nothing
         sysimg_path = default_sysimg_path(debug)
