@@ -18,14 +18,15 @@ end
     end
 end
 
-
+"""Print `cmd` and then execute it"""
 function printrun(cmd::Cmd)
     info(cmd)
     run(cmd)
 end
 
 
-function build_sysimg(sysimg_path=nothing, cpu_target="native", userimg_path=nothing; force=false, debug=false)
+function build_sysimg(sysimg_path=nothing, cpu_target="native",
+                      userimg_path=nothing; force=false, debug=false)
     if sysimg_path == nothing
         sysimg_path = default_sysimg_path(debug)
     end
@@ -144,7 +145,7 @@ function find_system_compiler()
     warn( "No supported compiler found; startup times will be longer" )
 end
 
-# Link sys.o into sys.$(dlext)
+"""Link sys.o into sys.$(dlext)"""
 function link_sysimg(sysimg_path=nothing, cc=find_system_compiler(), debug=false)
     if sysimg_path == nothing
         sysimg_path = default_sysimg_path(debug)
