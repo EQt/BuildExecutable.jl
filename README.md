@@ -20,3 +20,8 @@ If packages with binary dependencies is used the produced executable will not fu
 ## Note on portability
 The executable produced by `build_executable` is known to be portable across Windows computers, and OS X, but not on Linux.
 To increase the portablity use an older `cpu_target` target as `"core2"` instead of `"native"`. 
+
+
+## How it works
+Basically, this package builds a slightly modified system image which includes the script file.
+See Jameson Nash's [blog about static compilation](http://juliacomputing.com/blog/2016/02/09/static-julia.html) for a more detailed explanation.
