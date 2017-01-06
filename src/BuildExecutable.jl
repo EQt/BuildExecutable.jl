@@ -69,19 +69,20 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     end
 
     isfile(script_file) || error("$(script_file) not found.")
-
-    tmpdir = mktempdir()
-    cfile = joinpath(tmpdir, "start_func.c")
-    userimgjl = joinpath(tmpdir, "userimg.jl")
     script_file = abspath(script_file)
 
+    tmpdir = targetdir
     if targetdir != nothing
         targetdir = abspath(targetdir)
         if !isdir(targetdir)
             error("targetdir is not a directory.")
         end
+    else
+        tmpdir = mktempdir()
     end
 
+    cfile = joinpath(tmpdir, "start_func.c")
+    userimgjl = joinpath(tmpdir, "userimg.jl")
     exe_file = Executable(exename, targetdir, debug)
     sys = SysFile(exename, debug)
 
@@ -97,8 +98,12 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
     end
 
+    info("script_file : $script_file")
+
     emit_cmain(cfile, exename, targetdir != nothing)
+    info("Created cfile $cfile")
     emit_userimgjl(userimgjl, script_file)
+    info("Prepared userimg.jl $userimgjl")
 
     gcc = find_system_gcc()
     win_arg = ``
