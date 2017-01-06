@@ -51,7 +51,7 @@ end
 
 
 function build_executable(exename, script_file, targetdir=nothing, cpu_target="native";
-                          force=false, debug=false)
+                          force=false, debug=false, delete_o_ji=false)
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(exesuff(julia))
         error("file '$(julia)' not found.")
@@ -125,7 +125,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     cmd =     setenv(`$gcc -g $win_arg $(incs)            $(cfile) -o $(exe_file.buildfile) -Wl,-rpath,$(sys.buildpath) -Wl,-rpath,$(sys.buildpath*"/julia") -L$(sys.buildpath) $(exe_file.libjulia) -l$(exename)`, ENV2)
     run(cmd)
 
-    if false
+    if delete_o_ji
         println("running: rm -rf $(tmpdir) $(sys.buildfile).o $(sys.inference).o $(sys.inference).ji $(sys.inference0).o $(sys.inference0).ji")
         map(f-> rm(f, recursive=true), [tmpdir, sys.buildfile*".o", sys.inference*".o", sys.inference*".ji", sys.inference0*".o", sys.inference0*".ji"])
         println()
