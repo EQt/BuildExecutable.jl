@@ -4,6 +4,9 @@ module BuildExecutable
 
 export build_executable
 
+const build_sysimg_jl = abspath(dirname(@__FILE__), "build_sysimg.jl")
+include(build_sysimg_jl)
+
 @static if is_windows()
     using WinRPMend
     exesuff(cmd::String) = cmd * ".exe"
@@ -53,13 +56,6 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     if !isfile(exesuff(julia))
         error("file '$(julia)' not found.")
     end
-    build_sysimg = abspath(dirname(@__FILE__), "build_sysimg.jl")
-    if !isfile(build_sysimg)
-        build_sysimg = abspath(JULIA_HOME, "..", "..", "contrib", "build_sysimg.jl")
-        if !isfile(build_sysimg)
-            error("build_sysimg.jl not found.")
-        end
-    end
 
     if targetdir != nothing
         patchelf = find_patchelf()
@@ -106,10 +102,10 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     info("Prepared userimg.jl $userimgjl")
 
     gcc = find_system_gcc()
-    win_arg = ``
+    win_arg = ""
     # This argument is needed for the gcc, see issue #9973
     @static if is_windows()
-        win_arg = Base.WORD_SIZE==32 ? `-D_WIN32_WINNT=0x0502 -march=pentium4` : `-D_WIN32_WINNT=0x0502`
+        win_arg = Base.WORD_SIZE==32 ? "-D_WIN32_WINNT=0x0502 -march=pentium4" : "-D_WIN32_WINNT=0x0502"
     end
     incs = get_includes()
     ENV2 = deepcopy(ENV)
@@ -122,16 +118,11 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
     end
 
-    empty_cmd_str = ``
-    println("running: $(julia) $(build_sysimg) $(sys.buildfile) $(cpu_target) $(userimgjl) --force" * (debug ? " --debug" : ""))
-    cmd = setenv(`$(julia) $(build_sysimg) $(sys.buildfile) $(cpu_target) $(userimgjl) --force $(debug ? "--debug" : empty_cmd_str)`, ENV2)
-    run(cmd)
-    println()
+    build_sysimg(sys.buildfile, cpu_target, userimgjl, debug=debug, force=true)
 
     println("running: $gcc -g $win_arg $(join(incs, " ")) $(cfile) -o $(exe_file.buildfile) -Wl,-rpath,$(sys.buildpath) -L$(sys.buildpath) $(exe_file.libjulia) -l$(exename)")
     cmd = setenv(`$gcc -g $win_arg $(incs) $(cfile) -o $(exe_file.buildfile) -Wl,-rpath,$(sys.buildpath) -Wl,-rpath,$(sys.buildpath*"/julia") -L$(sys.buildpath) $(exe_file.libjulia) -l$(exename)`, ENV2)
     run(cmd)
-    println()
 
     println("running: rm -rf $(tmpdir) $(sys.buildfile).o $(sys.inference).o $(sys.inference).ji $(sys.inference0).o $(sys.inference0).ji")
     map(f-> rm(f, recursive=true), [tmpdir, sys.buildfile*".o", sys.inference*".o", sys.inference*".ji", sys.inference0*".o", sys.inference0*".ji"])
