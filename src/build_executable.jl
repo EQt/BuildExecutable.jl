@@ -1,4 +1,7 @@
 #!/usr/bin/env julia
+#
+# Make the BuildExecutable package available via command line interface.
+#
 using BuildExecutable
 
 if !isinteractive()
