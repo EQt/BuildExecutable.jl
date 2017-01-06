@@ -1,3 +1,4 @@
+#!/usr/bin/env julia
 using BuildExecutable
 
 if !isinteractive()
