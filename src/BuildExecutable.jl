@@ -179,7 +179,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
     end
 
-    println("$(exe_file.targetfile) successfully created.")
+    info("$(exe_file.targetfile) successfully created.")
     return 0
 end
 
