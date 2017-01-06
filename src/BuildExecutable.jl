@@ -1,19 +1,10 @@
-module BuildExecutable
-export build_executable
-@static if is_windows()
-    using WinRPM
-end
-# Builds an executable that doesn't require any julia source code.
-# The user needs to provide a julia script that contains a function main(),
-# taking no argument, which will be run when executing the
-# produced executable.
+# See ../README.md
 
-# Note on packages:
-# Even if the script contains using statements, exported functions
-# will not be available in main(). Full qualification of names is
-# required. It's suggested to replace using statements with import
-# statements to produce a consistent result between running main() in
-# the REPL and running the executable.
+module BuildExecutable
+
+export build_executable
+
+@static if is_windows() using WinRPMend
 
 type Executable
     name
