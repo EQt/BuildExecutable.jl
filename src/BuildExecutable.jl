@@ -57,30 +57,24 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
                           force=false, debug=false)
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(julia * @static is_windows() ? ".exe" : "")
-        println("ERROR: file '$(julia)' not found.")
-        return 1
+        error("file '$(julia)' not found.")
     end
     build_sysimg = abspath(dirname(@__FILE__), "build_sysimg.jl")
     if !isfile(build_sysimg)
         build_sysimg = abspath(JULIA_HOME, "..", "..", "contrib", "build_sysimg.jl")
         if !isfile(build_sysimg)
-            println("ERROR: build_sysimg.jl not found.")
-            return 1
+            error("build_sysimg.jl not found.")
         end
     end
 
     if targetdir != nothing
         patchelf = find_patchelf()
         if patchelf == nothing && !(is_windows())
-            println("ERROR: Using the 'targetdir' option requires the 'patchelf' utility. Please install it.")
-            return 1
+            error("Using the 'targetdir' option requires the 'patchelf' utility. Please install it.")
         end
     end
 
-    if !isfile(script_file)
-        println("ERROR: $(script_file) not found.")
-        return 1
-    end
+    isfile(script_file) || error("$(script_file) not found.")
 
     tmpdir = mktempdir()
     cfile = joinpath(tmpdir, "start_func.c")
@@ -90,8 +84,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     if targetdir != nothing
         targetdir = abspath(targetdir)
         if !isdir(targetdir)
-            println("ERROR: targetdir is not a directory.")
-            return 1
+            error("targetdir is not a directory.")
         end
     end
 
@@ -101,14 +94,12 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     if !force
         for f in [cfile, userimgjl, "$(sys.buildfile).$(Libdl.dlext)", "$(sys.buildfile).ji", exe_file.buildfile]
             if isfile(f)
-                println("ERROR: File '$(f)' already exists. Delete it or use --force.")
-                return 1
+                error("File '$(f)' already exists. Delete it or use --force.")
             end
         end
 
         if targetdir != nothing && !isempty(readdir(targetdir))
-            println("ERROR: targetdir is not an empty diectory. Delete all contained files or use --force.")
-            return 1
+            error("targetdir is not an empty diectory. Delete all contained files or use --force.")
         end
     end
 
@@ -342,7 +333,9 @@ function find_system_gcc()
         end
     end
 
-    error( "GCC not found on system: " * @static is_windows() ? "GCC can be installed via `Pkg.add(\"WinRPM\"); WinRPM.install(\"gcc\")`" : "" )
+    error("GCC not found on system: " *
+          @static is_windows() ?
+          "GCC can be installed via `Pkg.add(\"WinRPM\"); WinRPM.install(\"gcc\")`" : "" )
 end
 
 end # module
