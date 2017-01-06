@@ -25,3 +25,9 @@ To increase the portablity use an older `cpu_target` target as `"core2"` instead
 ## How it works
 Basically, this package builds a slightly modified system image which includes the script file.
 See Jameson Nash's [blog about static compilation](http://juliacomputing.com/blog/2016/02/09/static-julia.html) for a more detailed explanation.
+
+    coreimg.jl --> inference.ji
+                       |          gcc
+           sysimg.jl --+--> sys.o ---> sys.$(Libdl.dlext)
+                       |
+                   userimg.jl: include("myscript.jl")
