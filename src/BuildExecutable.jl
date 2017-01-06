@@ -119,11 +119,12 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
     end
 
-    build_sysimg(sys.buildfile, cpu_target, userimgjl, debug=debug, force=true)
+    build_sysimg(sys.buildfile, cpu_target, userimgjl,
+                 debug=debug, force=true, odir=targetdir)
 
     rpath = `-Wl,-rpath,$(sys.buildpath) -Wl,-rpath,$(sys.buildpath*"/julia")`
     flags = `-g -L$(sys.buildpath) $(exe_file.libjulia) -l$(exename)`
-    cmd = `$gcc  $win_arg $(incs) $(cfile) -o $(exe_file.buildfile) $rpath $libs`
+    cmd = `$gcc $win_arg $(incs) $(cfile) -o $(exe_file.buildfile) $rpath $flags`
     info(cmd)
     run(setenv(cmd, ENV2))
 

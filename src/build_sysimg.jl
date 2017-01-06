@@ -25,8 +25,8 @@ function printrun(cmd::Cmd)
 end
 
 
-function build_sysimg(sysimg_path=nothing, cpu_target="native",
-                      userimg_path=nothing; force=false, debug=false)
+function build_sysimg(sysimg_path=nothing, cpu_target="native", userimg_path=nothing;
+                      force=false, debug=false, odir::String="")
     if sysimg_path == nothing
         sysimg_path = default_sysimg_path(debug)
     end
@@ -72,6 +72,12 @@ function build_sysimg(sysimg_path=nothing, cpu_target="native",
         end
         try
             function juliac(output::String, cmd::Cmd)
+                if length(odir) > 0
+                    output = joinpath(abspath(odir), basename(output))
+                    warn("Using $output")
+                else
+                    warn("Using $System libraries")
+                end
                 if isfile("$output.ji") && isfile("$output.o")
                     info("$output already created")
                 else
@@ -79,7 +85,6 @@ function build_sysimg(sysimg_path=nothing, cpu_target="native",
                     printrun(cmd)
                 end
             end
-            
 
             # Start by building inference0.{ji,o}
             inference0_path = joinpath(dirname(sysimg_path), "inference0")
