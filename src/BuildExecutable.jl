@@ -31,19 +31,19 @@ end
 
 
 type SysFile
-    buildpath
-    buildfile
-    inference
-    inference0
+    buildpath::String
+    buildfile::String
+    inference::String
+    inference0::String
+    function SysFile(exename::String, debug::Bool=false)
+        buildpath = abspath(dirname(Libdl.dlpath(debug ? "libjulia-debug" : "libjulia")))
+        buildfile = joinpath(buildpath, "lib"*exename)
+        inference = joinpath(buildpath, "inference")
+        inference0 = joinpath(buildpath, "inference0")
+        new(buildpath, buildfile, inference, inference0)
+    end
 end
 
-function SysFile(exename, debug=false)
-    buildpath = abspath(dirname(Libdl.dlpath(debug ? "libjulia-debug" : "libjulia")))
-    buildfile = joinpath(buildpath, "lib"*exename)
-    inference = joinpath(buildpath, "inference")
-    inference0 = joinpath(buildpath, "inference0")
-    SysFile(buildpath, buildfile, inference, inference0)
-end
 
 function build_executable(exename, script_file, targetdir=nothing, cpu_target="native";
                           force=false, debug=false)
