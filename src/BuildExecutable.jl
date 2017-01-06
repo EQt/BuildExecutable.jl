@@ -240,7 +240,7 @@ function emit_cmain(cfile, exename, relocation)
         #include <assert.h>
         #include <string.h>
         #if defined(_WIN32) || defined(_WIN64)
-        #include <malloc.h>
+        #  include <malloc.h>
         #endif
 
         void failed_warning(void) {
