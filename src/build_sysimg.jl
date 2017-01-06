@@ -182,30 +182,3 @@ function link_sysimg(sysimg_path=nothing, cc=find_system_compiler(), debug=false
         end
     end
 end
-
-# When running this file as a script, try to do so with default values.  If arguments are passed
-# in, use them as the arguments to build_sysimg above
-if !isinteractive()
-    if length(ARGS) > 5 || ("--help" in ARGS || "-h" in ARGS)
-        println("Usage: build_sysimg.jl <sysimg_path> <cpu_target> <usrimg_path.jl> [--force] [--debug] [--help]")
-        println("   <sysimg_path>    is an absolute, extensionless path to store the system image at")
-        println("   <cpu_target>     is an LLVM cpu target to build the system image against")
-        println("   <usrimg_path.jl> is the path to a user image to be baked into the system image")
-        println("   --debug          Using julia-debug instead of julia to build the system image")
-        println("   --force          Set if you wish to overwrite the default system image")
-        println("   --help           Print out this help text and exit")
-        println()
-        println(" Example:")
-        println("   build_sysimg.jl /usr/local/lib/julia/sys core2 ~/my_usrimg.jl --force")
-        println()
-        println(" Running this script with no arguments is equivalent to:")
-        println("   build_sysimg.jl $(default_sysimg_path) native")
-        return 0
-    end
-
-    debug_flag = "--debug" in ARGS
-    filter!(x -> x != "--debug", ARGS)
-    force_flag = "--force" in ARGS
-    filter!(x -> x != "--force", ARGS)
-    build_sysimg(ARGS...; force=force_flag, debug=debug_flag)
-end
