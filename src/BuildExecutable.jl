@@ -4,7 +4,12 @@ module BuildExecutable
 
 export build_executable
 
-@static if is_windows() using WinRPMend end
+@static if is_windows()
+    using WinRPMend
+    exesuff(cmd::String) = cmd * ".exe"
+else
+    exesuff(cmd::String) = cmd
+end
 
 """Collect all information for creating an executable"""
 type Executable
@@ -17,10 +22,7 @@ type Executable
         if debug
             exename = exename * "-debug"
         end
-        filename = exename
-        @static if is_windows()
-            filename = filename * ".exe"
-        end
+        filename = exesuff(exename)
         buildfile = abspath(joinpath(JULIA_HOME, filename))
         targetfile = targetdir == nothing ? buildfile : joinpath(targetdir, filename)
         libjulia = debug ? "-ljulia-debug" : "-ljulia"
@@ -48,7 +50,7 @@ end
 function build_executable(exename, script_file, targetdir=nothing, cpu_target="native";
                           force=false, debug=false)
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
-    if !isfile(julia * @static is_windows() ? ".exe" : "")
+    if !isfile(exesuff(julia))
         error("file '$(julia)' not found.")
     end
     build_sysimg = abspath(dirname(@__FILE__), "build_sysimg.jl")
