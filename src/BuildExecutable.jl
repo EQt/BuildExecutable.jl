@@ -4,30 +4,31 @@ module BuildExecutable
 
 export build_executable
 
-@static if is_windows() using WinRPMend
+@static if is_windows() using WinRPMend end
 
+"""Collect all information for creating an executable"""
 type Executable
-    name
-    filename
-    buildfile
-    targetfile
-    libjulia
+    name::String
+    filename::String
+    buildfile::String
+    targetfile::String
+    libjulia::String
+    function  Executable(exename::String, targetdir::String, debug::Bool)
+        if debug
+            exename = exename * "-debug"
+        end
+        filename = exename
+        @static if is_windows()
+            filename = filename * ".exe"
+        end
+        buildfile = abspath(joinpath(JULIA_HOME, filename))
+        targetfile = targetdir == nothing ? buildfile : joinpath(targetdir, filename)
+        libjulia = debug ? "-ljulia-debug" : "-ljulia"
+
+        new(exename, filename, buildfile, targetfile, libjulia)
+    end
 end
 
-function Executable(exename, targetdir, debug)
-    if debug
-        exename = exename * "-debug"
-    end
-    filename = exename
-    @static if is_windows()
-        filename = filename * ".exe"
-    end
-    buildfile = abspath(joinpath(JULIA_HOME, filename))
-    targetfile = targetdir == nothing ? buildfile : joinpath(targetdir, filename)
-    libjulia = debug ? "-ljulia-debug" : "-ljulia"
-
-    Executable(exename, filename, buildfile, targetfile, libjulia)
-end
 
 type SysFile
     buildpath
