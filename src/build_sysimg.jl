@@ -40,37 +40,13 @@ function build_sysimg(sysimg_path=nothing, cpu_target="native",
         end
     end
 
-    # Canonicalize userimg_path before we enter the base_dir
-    if userimg_path != nothing
-        userimg_path = abspath(userimg_path)
-    end
-
     # Enter base/ and setup some useful paths
     base_dir = dirname(Base.find_source_file("sysimg.jl"))
     cd(base_dir) do
         julia = joinpath(JULIA_HOME, debug ? "julia-debug" : "julia")
         cc = find_system_compiler()
 
-        # Ensure we have write-permissions to wherever we're trying to write to
-        try
-            touch("$sysimg_path.ji")
-        catch
-            err_msg =  "Unable to modify $sysimg_path.ji, ensure parent directory exists "
-            err_msg *= "and is writable. Absolute paths work best.)"
-            error( err_msg )
-        end
-
-        # Copy in userimg.jl if it exists...
-        if userimg_path != nothing
-            if !isfile(userimg_path)
-                error("$userimg_path is not found, ensure it is an absolute path!")
-            end
-            if isfile("userimg.jl")
-                error("$base_dir/userimg.jl already exists, delete manually to continue.")
-            end
-            cp(userimg_path, "userimg.jl")
-        end
-        try
+        begin
             function juliac(output::String, cmd::Cmd)
                 if isfile("$output.ji") && isfile("$output.o")
                     info("$output already created")
@@ -110,16 +86,11 @@ function build_sysimg(sysimg_path=nothing, cpu_target="native",
             else
                 info("Julia will automatically load this system image at next startup")
             end
-        finally
-            # Cleanup userimg.jl
-            if userimg_path != nothing && isfile("userimg.jl")
-                rm("userimg.jl")
-            end
         end
     end
 end
 
-# Search for a compiler to link sys.o into sys.dl_ext.  Honor LD environment variable.
+"""Search for a compiler to link sys.o into sys.dl_ext.  Honor LD environment variable."""
 function find_system_compiler()
     if haskey( ENV, "CC" )
         if !success(`$(ENV["CC"]) -v`)
@@ -152,7 +123,7 @@ function find_system_compiler()
         end
     end
 
-    warn( "No supported compiler found; startup times will be longer" )
+    warn("No supported compiler found; startup times will be longer")
 end
 
 """Link sys.o into sys.$(Libdl.dlext)"""
