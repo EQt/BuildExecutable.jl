@@ -328,7 +328,7 @@ end
 function find_system_gcc()
     # On Windows, check to see if WinRPM is installed, and if so, see if gcc is installed
     @static if is_windows()
-        succuss(`gcc --version`) && return "gcc"
+        success(`gcc --version`) && return "gcc"
         try
             winrpmgcc = joinpath(WinRPM.installdir,"usr","$(Sys.ARCH)-w64-mingw32",
                 "sys-root","mingw","bin","gcc.exe")
