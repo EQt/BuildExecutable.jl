@@ -131,6 +131,7 @@ function find_system_compiler()
     # On Windows, check to see if WinRPM is installed, and if so, see if gcc is installed
     @static if is_windows()
         try
+            success(`gcc --version`) && return "gcc"
             eval(Main, :(using WinRPM))
             winrpmgcc = joinpath(WinRPM.installdir,"usr","$(Sys.ARCH)-w64-mingw32",
                 "sys-root","mingw","bin","gcc.exe")
