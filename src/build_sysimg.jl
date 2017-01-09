@@ -25,12 +25,8 @@ function printrun(cmd::Cmd)
 end
 
 
-function build_sysimg(sysimg_path=nothing, cpu_target="native", userimg_path=nothing;
+function build_sysimg(sysimg_path::String, cpu_target="native", userimg_path=nothing;
                       force=false, debug=false, odir::String="")
-    if sysimg_path == nothing
-        sysimg_path = default_sysimg_path(debug)
-    end
-
     # Quit out if a sysimg is already loaded and is in the same spot as sysimg_path, unless forcing
     sysimg = Libdl.dlopen_e("sys")
     if sysimg != C_NULL
@@ -161,10 +157,7 @@ function find_system_compiler()
 end
 
 """Link sys.o into sys.$(Libdl.dlext)"""
-function link_sysimg(sysimg_path=nothing, cc=find_system_compiler(), debug=false)
-    if sysimg_path == nothing
-        sysimg_path = default_sysimg_path(debug)
-    end
+function link_sysimg(sysimg_path::String, cc=find_system_compiler(), debug=false)
     julia_libdir = dirname(Libdl.dlpath(debug ? "libjulia-debug" : "libjulia"))
 
     FLAGS = ["-L$julia_libdir"]
@@ -175,7 +168,7 @@ function link_sysimg(sysimg_path=nothing, cc=find_system_compiler(), debug=false
         push!(FLAGS, "-lssp")
     end
 
-    info("Linking sys.$(Libdl.dlext)")
+    info("Linking $sysimg_path.$(Libdl.dlext)")
     run(`$cc $FLAGS -o $sysimg_path.$(Libdl.dlext) $sysimg_path.o`)
 
     info("System image successfully built at $sysimg_path.$(Libdl.dlext)")
