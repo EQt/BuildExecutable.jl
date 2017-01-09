@@ -8,7 +8,7 @@ const build_sysimg_jl = abspath(dirname(@__FILE__), "build_sysimg.jl")
 include(build_sysimg_jl)
 
 @static if is_windows()
-    using WinRPMend
+    using WinRPM
     exesuff(cmd::String) = cmd * ".exe"
 else
     exesuff(cmd::String) = cmd
