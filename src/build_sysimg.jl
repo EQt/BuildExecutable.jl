@@ -82,13 +82,12 @@ function build_sysimg(sysimg_path::String, cpu_target="native", userimg_path=not
                 end
             end
 
-            # Start by building inference0.{ji,o}
-            inference0_path = joinpath(dirname(sysimg_path), "inference0")
-            info("Building inference0.o...")
-            juliac(inference0_path, `coreimg.jl`)
-
             # Bootstrap off off that to create inference.{ji,o}
-            inference_path = joinpath(dirname(sysimg_path), "inference")
+            inference_path = if length(odir) > 0
+                joinpath(abspath(odir), "inference")
+            else
+                joinpath(dirname(sysimg_path), "inference")
+            end
             info("Building inference.o...")
             juliac(inference_path, `coreimg.jl`)
 

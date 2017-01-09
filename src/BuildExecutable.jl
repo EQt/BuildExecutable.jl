@@ -21,12 +21,17 @@ type Executable
     buildfile::String
     targetfile::String
     libjulia::String
-    function  Executable(exename::String, targetdir::String, debug::Bool)
+    function  Executable(exename::String, targetdir::String, debug::Bool;
+                         odir::String="")
         if debug
             exename = exename * "-debug"
         end
         filename = exesuff(exename)
-        buildfile = abspath(joinpath(JULIA_HOME, filename))
+        buildfile = if length(odir) > 0
+            abspath(joinpath(odir, filename))
+        else
+            abspath(joinpath(JULIA_HOME, filename))
+        end
         targetfile = targetdir == nothing ? buildfile : joinpath(targetdir, filename)
         libjulia = debug ? "-ljulia-debug" : "-ljulia"
 
@@ -40,12 +45,15 @@ type SysFile
     buildfile::String
     inference::String
     inference0::String
-    function SysFile(exename::String, debug::Bool=false)
-        buildpath = abspath(dirname(Libdl.dlpath(debug ? "libjulia-debug" : "libjulia")))
+    libjulia::String
+    function SysFile(exename::String, debug::Bool=false; odir::String="")
+        libjul = debug ? "libjulia-debug" : "libjulia"
+        libjul = abspath(dirname(Libdl.dlpath(libjul)))
+        buildpath =  length(odir) > 0 ? abspath(odir) : libjul
         buildfile = joinpath(buildpath, "lib"*exename)
         inference = joinpath(buildpath, "inference")
         inference0 = joinpath(buildpath, "inference0")
-        new(buildpath, buildfile, inference, inference0)
+        new(buildpath, buildfile, inference, inference0, libjul)
     end
 end
 
@@ -79,8 +87,8 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
 
     cfile = joinpath(tmpdir, "start_func.c")
     userimgjl = joinpath(tmpdir, "userimg.jl")
-    exe_file = Executable(exename, targetdir, debug)
-    sys = SysFile(exename, debug)
+    exe_file = Executable(exename, targetdir, debug, odir=targetdir)
+    sys = SysFile(exename, debug, odir=targetdir)
 
     if !force
         for f in [cfile, userimgjl, "$(sys.buildfile).$(Libdl.dlext)", "$(sys.buildfile).ji", exe_file.buildfile]
@@ -122,8 +130,8 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     build_sysimg(sys.buildfile, cpu_target, userimgjl,
                  debug=debug, force=true, odir=targetdir)
 
-    rpath = `-Wl,-rpath,$(sys.buildpath) -Wl,-rpath,$(sys.buildpath*"/julia")`
-    flags = `-g -L$(sys.buildpath) $(exe_file.libjulia) -l$(exename)`
+    rpath = `-Wl,-rpath,$(sys.libjulia) -Wl,-rpath,$(sys.libjulia*"/julia")`
+    flags = `-g -L$(targetdir) -L$(sys.libjulia) $(exe_file.libjulia) -l$(exename)`
     cmd = `$gcc $win_arg $(incs) $(cfile) -o $(exe_file.buildfile) $rpath $flags`
     info(cmd)
     run(setenv(cmd, ENV2))
@@ -136,18 +144,25 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
 
     if targetdir != nothing
         # Move created files to target directory
-        for file in [exe_file.buildfile, sys.buildfile * ".$(Libdl.dlext)", sys.buildfile * ".ji"]
-            mv(file, joinpath(targetdir, basename(file)), remove_destination=force)
+        for file in [exe_file.buildfile,
+                     sys.buildfile * ".$(Libdl.dlext)",
+                     sys.buildfile * ".ji"]
+            dst = joinpath(targetdir, basename(file))
+            Base.samefile(file, dst) || mv(file, dst, remove_destination=force)
         end
 
         # Copy needed shared libraries to the target directory
         tmp = ".*\.$(Libdl.dlext).*"
-        paths = [sys.buildpath]
-        VERSION>v"0.5.0-dev+5537" && is_unix() && push!(paths, sys.buildpath*"/julia")
+        paths = [sys.libjulia]
+        if VERSION>v"0.5.0-dev+5537" && is_unix()
+            push!(paths, joinpath(sys.libjulia, "julia"))
+        end
         for path in paths
             shlibs = filter(Regex(tmp),readdir(path))
             for shlib in shlibs
-                cp(joinpath(path, shlib), joinpath(targetdir, shlib), remove_destination=force)
+                src = joinpath(path, shlib)
+                dst = joinpath(targetdir, shlib)
+                cp(src, dst, remove_destination=force)
             end
         end
 
