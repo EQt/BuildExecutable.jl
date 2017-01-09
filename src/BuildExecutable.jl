@@ -8,7 +8,9 @@ const build_sysimg_jl = abspath(dirname(@__FILE__), "build_sysimg.jl")
 include(build_sysimg_jl)
 
 @static if is_windows()
-    using WinRPM
+    if !success(`gcc --version`)
+        using WinRPM
+    end
     exesuff(cmd::String) = cmd * ".exe"
 else
     exesuff(cmd::String) = cmd
@@ -113,7 +115,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     win_arg = ``
     # This argument is needed for the gcc, see issue #9973
     @static if is_windows()
-        win_arg = Base.WORD_SIZE==32 ?
+        win_arg = Sys.WORD_SIZE==32 ?
             "-D_WIN32_WINNT=0x0502 -march=pentium4" : "-D_WIN32_WINNT=0x0502"
     end
     incs = get_includes()
@@ -326,6 +328,7 @@ end
 function find_system_gcc()
     # On Windows, check to see if WinRPM is installed, and if so, see if gcc is installed
     @static if is_windows()
+        succuss(`gcc --version`) && return "gcc"
         try
             winrpmgcc = joinpath(WinRPM.installdir,"usr","$(Sys.ARCH)-w64-mingw32",
                 "sys-root","mingw","bin","gcc.exe")
