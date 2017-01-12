@@ -63,6 +63,10 @@ end
 function build_executable(exename, script_file, targetdir=nothing, cpu_target="native";
                           force=false, debug=false, delete_o_ji=false,
                           static=false)
+    if static
+        error("Not fully implemented, yet ...")
+    end
+
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(exesuff(julia))
         error("file '$(julia)' not found.")
