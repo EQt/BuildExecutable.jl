@@ -152,7 +152,11 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     run(cmd)
 
     rpath = `-Wl,-rpath,$(sys.libjulia) -Wl,-rpath,$(sys.libjulia*"/julia")`
-    flags = `$(sys.buildfile).o -g -L$(sys.libjulia) $(exe_file.libjulia) -L$(targetdir) -l$(exename) -lm`
+    flags = if static
+        `sys.buildfile).o -g -L$(sys.libjulia) $(exe_file.libjulia) -lm`
+    else
+        `-g -L$(sys.libjulia) $(exe_file.libjulia) -L$(targetdir) -l$(exename) -lm`
+    end
     cmd = `$gcc $win_arg $(incs) $(cfile) -o $(exe_file.buildfile) $rpath $flags`
     info(cmd)
     run(setenv(cmd, ENV2))
