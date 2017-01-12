@@ -2,7 +2,8 @@
 #
 # Make the BuildExecutable package available via command line interface.
 #
-using BuildExecutable
+
+include("BuildExecutable.jl")
 
 if !isinteractive()
     if length(ARGS) < 2 || ("--help" in ARGS || "-h" in ARGS)
