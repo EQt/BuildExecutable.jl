@@ -133,12 +133,18 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     # build_sysimg(sys.buildfile, cpu_target, userimgjl,
     #              debug=debug, force=true, odir=targetdir)
     sys_dl = joinpath(sys.libjulia, "julia", debug ? "sys-debug." :  "sys." * Libdl.dlext)
-    cmd = `-J $sys_dl --startup-file=no $script_file`
-    cmd = `$julia -C $cpu_target --output-o $(sys.buildfile).o $cmd`
-    info(cmd)
-    run(cmd)
+    let out = "$(sys.buildfile).o"
+        if !isfile(out)
+            cmd = `-J $sys_dl --startup-file=no $script_file`
+            cmd = `$julia -C $cpu_target --output-o $out $cmd`
+            info(cmd)
+            run(cmd)
+        else
+            info("already exists: $out")
+        end
+    end
     rpath = `-Wl,-rpath,$(sys.libjulia) -Wl,-rpath,$(sys.libjulia*"/julia")`
-    flags = `-g -L$(targetdir) -L$(sys.libjulia) $(exe_file.libjulia) -l$(exename)`
+    flags = `$(sys.buildfile).o -g -L$(sys.libjulia) $(exe_file.libjulia) -lm`
     cmd = `$gcc $win_arg $(incs) $(cfile) -o $(exe_file.buildfile) $rpath $flags`
     info(cmd)
     run(setenv(cmd, ENV2))
@@ -155,7 +161,13 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
                      sys.buildfile * ".$(Libdl.dlext)",
                      sys.buildfile * ".ji"]
             dst = joinpath(targetdir, basename(file))
-            Base.samefile(file, dst) || mv(file, dst, remove_destination=force)
+            isfile(file) || continue
+            try
+                Base.samefile(file, dst) || mv(file, dst, remove_destination=force)
+            catch
+                warn("file = $file")
+                rethrow()
+            end
         end
 
         # Copy needed shared libraries to the target directory
