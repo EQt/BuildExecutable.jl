@@ -14,6 +14,7 @@ if !isinteractive()
         println("                    needed files into (default: julia directory structure)")
         println("   --debug          Using julia-debug instead of julia to build the executable")
         println("   --force          Set if you wish to overwrite existing files")
+        println("   --static         Link the sysimage statically")
         println("   --help           Print out this help text and exit")
         println()
         println(" Example:")
@@ -22,8 +23,10 @@ if !isinteractive()
     end
 
     debug_flag = "--debug" in ARGS
+    static_flag = "--static" in ARGS
+    filter!(x -> x != "--static", ARGS)
     filter!(x -> x != "--debug", ARGS)
     force_flag = "--force" in ARGS
     filter!(x -> x != "--force", ARGS)
-    BuildExecutable.build_executable(ARGS..., force=force_flag, debug=debug_flag)
+    BuildExecutable.build_executable(ARGS..., force=force_flag, debug=debug_flag, static=static_flag)
 end
