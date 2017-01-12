@@ -151,7 +151,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
             info("already exists: $out")
         end
     end
-    cmd = `gcc $win_arg -shared $(sys.buildfile).o -o $(sys.buildfile).$(Libdl.dlext)`
+    cmd = `gcc $win_arg -shared $(sys.buildfile).o -o $(sys.buildfile).$(Libdl.dlext) -L$(sys.libjulia) $(exe_file.libjulia)`
     info(cmd)
     run(cmd)
 
