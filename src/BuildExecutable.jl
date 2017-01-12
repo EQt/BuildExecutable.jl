@@ -56,7 +56,7 @@ type SysFile
         inference = joinpath(buildpath, "inference")
         inference0 = joinpath(buildpath, "inference0")
         @static if is_windows()
-            libjul = replace(r"bin\\", "lib\\julia\\", libjul)
+            libjul = replace(libjul, r"bin\\", "lib\\julia\\")
         end
         new(buildpath, buildfile, inference, inference0, libjul)
     end
