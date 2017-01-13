@@ -115,7 +115,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
 
     info("script_file : $script_file")
 
-    emit_cmain(cfile, exename, targetdir != nothing)
+    emit_cmain(cfile, exename, targetdir != nothing, cpu_target=cpu_target)
     info("Created cfile $cfile")
     emit_userimgjl(userimgjl, script_file)
     info("Prepared userimg.jl $userimgjl")
@@ -269,7 +269,7 @@ function get_includes()
     ret
 end
 
-function emit_cmain(cfile, exename, relocation)
+function emit_cmain(cfile, exename, relocation; cpu_target="native")
     if relocation
         sysji = joinpath("lib"*exename)
     else
@@ -301,6 +301,10 @@ function emit_cmain(cfile, exename, relocation)
             libsupport_init();
             jl_options.julia_home = julia_home_dir;
             fprintf(stderr, "cpu_target = %s\\n", jl_options.cpu_target);
+            if (jl_options.cpu_target == NULL) {
+                fprintf(stderr, "setting it to \\"$(cpu_target)\\"\\n");
+                jl_options.cpu_target = "$(cpu_target)";
+            }
             if (image_relative_path != NULL)
                 jl_options.image_file = image_relative_path;
             julia_init(JL_IMAGE_JULIA_HOME);
