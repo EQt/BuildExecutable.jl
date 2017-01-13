@@ -298,13 +298,13 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
                                 const char *image_relative_path)
         {
             if (jl_is_initialized()) return;
-            libsupport_init();
-            jl_options.julia_home = julia_home_dir;
             fprintf(stderr, "cpu_target = %s\\n", jl_options.cpu_target);
             if (jl_options.cpu_target == NULL) {
                 fprintf(stderr, "setting it to \\"$(cpu_target)\\"\\n");
                 jl_options.cpu_target = "$(cpu_target)";
             }
+            libsupport_init();
+            jl_options.julia_home = julia_home_dir;
             if (image_relative_path != NULL)
                 jl_options.image_file = image_relative_path;
             julia_init(JL_IMAGE_JULIA_HOME);
