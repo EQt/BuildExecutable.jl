@@ -294,8 +294,8 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
         #  include <malloc.h>
         #endif
 
-        JL_DLLEXPORT void my_init_with_image(const char *julia_home_dir,
-                                             const char *image_relative_path)
+        void my_init_with_image(const char *julia_home_dir,
+                                const char *image_relative_path)
         {
             if (jl_is_initialized()) return;
             libsupport_init();
