@@ -300,7 +300,7 @@ function emit_cmain(cfile, exename, relocation)
             if (jl_is_initialized()) return;
             libsupport_init();
             jl_options.julia_home = julia_home_dir;
-            fprintf(stderr, "cpu_targ = %s\n", jl_options.cpu_target);
+            fprintf(stderr, "cpu_target = %s\\n", jl_options.cpu_target);
             if (image_relative_path != NULL)
                 jl_options.image_file = image_relative_path;
             julia_init(JL_IMAGE_JULIA_HOME);
