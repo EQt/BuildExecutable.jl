@@ -294,6 +294,20 @@ function emit_cmain(cfile, exename, relocation)
         #  include <malloc.h>
         #endif
 
+        JL_DLLEXPORT void my_init_with_image(const char *julia_home_dir,
+                                             const char *image_relative_path)
+        {
+            if (jl_is_initialized()) return;
+            libsupport_init();
+            jl_options.julia_home = julia_home_dir;
+            fprintf(stderr, "cpu_targ = %s\n", jl_options.cpu_target);
+            if (image_relative_path != NULL)
+                jl_options.image_file = image_relative_path;
+            julia_init(JL_IMAGE_JULIA_HOME);
+            jl_exception_clear();
+        }
+
+
         void failed_warning(void) {
             if (jl_base_module == NULL) { // image not loaded!
                 char *julia_home = getenv("JULIA_HOME");
@@ -314,7 +328,7 @@ function emit_cmain(cfile, exename, relocation)
 
             assert(atexit(&failed_warning) == 0);
 
-            jl_init_with_image(NULL, sysji_env == NULL ? sysji : sysji_env);
+            my_init_with_image(NULL, sysji_env == NULL ? sysji : sysji_env);
 
             // set Base.ARGS, not Core.ARGS
             if (jl_base_module != NULL) {
