@@ -300,11 +300,16 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
                                 const char *image_relative_path)
         {
             if (jl_is_initialized()) return;
-            printf("isopenlibm() = %d\\n", isopenlibm());
-            fprintf(stderr, "cpu_target = %s\\n", jl_options.cpu_target);
-            if (jl_options.cpu_target == NULL) {
+            if (getenv("JL_INFO")) {
+                fprintf(stderr, "isopenlibm() = %d\\n", isopenlibm());
+                fprintf(stderr, "cpu_target = %s\\n", jl_options.cpu_target);
                 fprintf(stderr, "setting it to \\"$(cpu_target)\\"\\n");
+            }
+            if (jl_options.cpu_target == NULL) {
                 jl_options.cpu_target = "$(cpu_target)";
+                if (getenv("JL_INFO")) {
+                    fprintf(stderr, "setting it to \\"$(cpu_target)\\"\\n");
+                }
             }
             libsupport_init();
             jl_options.julia_home = julia_home_dir;
