@@ -98,7 +98,14 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     exe_file = Executable(exename, targetdir, debug, odir=targetdir)
     sys = SysFile(exename, debug, odir=targetdir)
 
-    if !force
+    if force
+        function rmexist(p::String)
+            if isfile(p)
+                rm(p)
+            end
+        end
+        rmexist("$(sys.buildfile).o")
+    else
         for f in [cfile, userimgjl, "$(sys.buildfile).$(Libdl.dlext)", "$(sys.buildfile).ji", exe_file.buildfile]
             if isfile(f)
                 error("File '$(f)' already exists. Delete it or use --force.")
