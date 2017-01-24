@@ -66,7 +66,7 @@ end
 """Build an executable out of a Julia script."""    
 function build_executable(exename, script_file, targetdir=nothing, cpu_target="native";
                           force=false, debug=false, delete_o_ji=false,
-                          static=false, gcc_args::String[]="")
+                          static=false, gcc_args::String[]=[])
 
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(exesuff(julia))
