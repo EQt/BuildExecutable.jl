@@ -117,7 +117,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
 
         if targetdir != nothing && !isempty(readdir(targetdir))
-            error("targetdir is not an empty diectory. Delete all contained files or use --force.")
+            warn("Targetdir '$targetdir' is not an empty diectory")
         end
     end
 
