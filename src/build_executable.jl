@@ -16,6 +16,7 @@ if !isinteractive()
         println("   --debug          Using julia-debug instead of julia to build the executable")
         println("   --force          Set if you wish to overwrite existing files")
         println("   --static         Link the sysimage statically")
+        println("   --gcc            All arguments hereafter are passed to the gcc linker")
         println("   --help           Print out this help text and exit")
         println()
         println(" Example:")
@@ -30,6 +31,11 @@ if !isinteractive()
     force_flag = "--force" in ARGS
     filter!(x -> x != "--force", ARGS)
     gcc_args = String[]
+    i = findfirst(x -> x == "--gcc", ARGS)
+    if i > 0
+        gcc_args = ARGS[i+1:end]
+        ARGS = deepcopy(ARGS[1:i-1])
+    end
     BuildExecutable.build_executable(ARGS..., force=force_flag,
                                      debug=debug_flag, static=static_flag,
                                      gcc_args=gcc_args)
