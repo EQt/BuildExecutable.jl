@@ -106,10 +106,13 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
         rmexist("$(sys.buildfile).o")
     else
-        for f in ["$(sys.buildfile).$(Libdl.dlext)", exe_file.buildfile]
+        for f in ["$(sys.buildfile).$(Libdl.dlext)"]
             if isfile(f)
                 f == "$(sys.buildfile).$(Libdl.dlext)" && static && continue
                 error("File '$(f)' already exists. Delete it or use --force.")
+            end
+            let f = exe_file.buildfile
+                isfile(f) && warn("File '$(f)' already exists")
             end
         end
 
