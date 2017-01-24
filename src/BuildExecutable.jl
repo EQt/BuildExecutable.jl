@@ -106,7 +106,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
         rmexist("$(sys.buildfile).o")
     else
-        for f in [userimgjl, "$(sys.buildfile).$(Libdl.dlext)", "$(sys.buildfile).ji", exe_file.buildfile]
+        for f in ["$(sys.buildfile).$(Libdl.dlext)", "$(sys.buildfile).ji", exe_file.buildfile]
             if isfile(f)
                 error("File '$(f)' already exists. Delete it or use --force.")
             end
