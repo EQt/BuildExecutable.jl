@@ -287,6 +287,9 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
         arr = "jl_alloc_cell_1d"
         str = "jl_utf8_string_type"
     end
+
+    call_postinit = "postinit();\n"
+    define_postinit = "#include \"$(joinpath(dirname(@__FILE__), "..", "..", "build", "postinit.c"))\""
     f = open(cfile, "w")
     write( f, """
         #include <julia.h>
@@ -299,6 +302,7 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
         #endif
 
         extern int isopenlibm();
+        $define_postinit
 
         void my_init_with_image(const char *julia_home_dir,
                                 const char *image_relative_path)
@@ -363,6 +367,7 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
                 }
             }
 
+            $call_postinit
             // call main
             jl_eval_string(mainfunc);
 
