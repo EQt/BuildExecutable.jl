@@ -29,5 +29,8 @@ if !isinteractive()
     filter!(x -> x != "--debug", ARGS)
     force_flag = "--force" in ARGS
     filter!(x -> x != "--force", ARGS)
-    BuildExecutable.build_executable(ARGS..., force=force_flag, debug=debug_flag, static=static_flag)
+    gcc_args = String[]
+    BuildExecutable.build_executable(ARGS..., force=force_flag,
+                                     debug=debug_flag, static=static_flag,
+                                     gcc_args=gcc_args)
 end
