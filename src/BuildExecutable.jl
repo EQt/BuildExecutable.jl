@@ -108,6 +108,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     else
         for f in ["$(sys.buildfile).$(Libdl.dlext)", "$(sys.buildfile).ji", exe_file.buildfile]
             if isfile(f)
+                f == "$(sys.buildfile).$(Libdl.dlext)" && static && continue
                 error("File '$(f)' already exists. Delete it or use --force.")
             end
         end
