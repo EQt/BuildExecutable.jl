@@ -67,9 +67,6 @@ end
 function build_executable(exename, script_file, targetdir=nothing, cpu_target="native";
                           force=false, debug=false, delete_o_ji=false,
                           static=false)
-    if static
-        error("Not fully implemented, yet ...")
-    end
 
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(exesuff(julia))
@@ -157,7 +154,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
 
     rpath = `-Wl,-rpath,$(sys.libjulia) -Wl,-rpath,$(sys.libjulia*"/julia")`
     flags = if static
-        `sys.buildfile).o -g -L$(sys.libjulia) $(exe_file.libjulia) -lopenlibm`
+        `$(sys.buildfile).o -g -L$(sys.libjulia) $(exe_file.libjulia) -L$(sys.libjulia*"/julia") -lopenlibm`
     else
         `-g -L$(sys.libjulia) -L$(sys.libjulia*"/julia") $(exe_file.libjulia) -lopenlibm -L$(targetdir) -l$(exename)`
     end
