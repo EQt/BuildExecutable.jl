@@ -32,11 +32,12 @@ if !isinteractive()
     filter!(x -> x != "--force", ARGS)
     gcc_args = String[]
     i = findfirst(x -> x == "--gcc", ARGS)
+    endi = length(ARGS)
     if i > 0
         gcc_args = ARGS[i+1:end]
-        ARGS = deepcopy(ARGS[1:i-1])
+        endi = i-1
     end
-    BuildExecutable.build_executable(ARGS..., force=force_flag,
+    BuildExecutable.build_executable(ARGS[1:endi]..., force=force_flag,
                                      debug=debug_flag, static=static_flag,
                                      gcc_args=gcc_args)
 end
