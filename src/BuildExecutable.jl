@@ -316,7 +316,11 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
         void my_init_with_image(const char *julia_home_dir,
                                 const char *image_relative_path)
         {
-            if (jl_is_initialized()) return;
+            if (jl_is_initialized()) {
+                if (getenv("JL_INFO"))
+                    fprintf(stderr, "not initialized\\n");
+                return;
+            }
             if (getenv("JL_INFO")) {
                 fprintf(stderr, "isopenlibm() = %d\\n", isopenlibm());
                 fprintf(stderr, "cpu_target = %s\\n", jl_options.cpu_target);
