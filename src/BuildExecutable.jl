@@ -130,7 +130,8 @@ function build_executable(exename::String,
 
     info("script_file : $script_file")
 
-    emit_cmain(cfile, exename, targetdir != nothing, cpu_target=cpu_target)
+    emit_cmain(cfile, exename, targetdir != nothing,
+               cpu_target=cpu_target, static=static)
     info("Created cfile $cfile")
     if compile_sys
         emit_userimgjl(userimgjl, script_file)
@@ -301,7 +302,7 @@ function get_includes(additional_includes::Bool = false)
     ret
 end
 
-function emit_cmain(cfile, exename, relocation; cpu_target="native")
+function emit_cmain(cfile, exename, relocation; cpu_target="native", static::Bool=false)
     if relocation
         sysji = joinpath("lib"*exename)
     else
@@ -318,6 +319,11 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
 
     call_postinit = "postinit();\n"
     define_postinit = "#include \"$(joinpath(dirname(@__FILE__), "..", "..", "build", "postinit.c"))\""
+    select_sysji = "sysji_env == NULL ? sysji : sysji_env"
+    if static
+        select_sysji = "sysji_env"
+    end
+        
     f = open(cfile, "w")
     write( f, """
         #include <julia.h>
@@ -387,7 +393,7 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
 
             assert(atexit(&failed_warning) == 0);
 
-            my_init_with_image(NULL, sysji_env == NULL ? sysji : sysji_env);
+            my_init_with_image(NULL, $select_sysji);
             if (getenv("JL_INFO"))
                 fprintf(stderr, "my_init_finished\\n");
             // set Base.ARGS, not Core.ARGS
