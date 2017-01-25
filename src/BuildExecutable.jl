@@ -210,6 +210,10 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
             for shlib in shlibs
                 src = joinpath(path, shlib)
                 dst = joinpath(targetdir, shlib)
+                if isfile(dst) && !force
+                    # warn("Do not copy $dst")
+                    continue
+                end
                 cp(src, dst, remove_destination=force)
             end
         end
