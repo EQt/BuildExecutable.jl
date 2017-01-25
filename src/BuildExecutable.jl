@@ -171,7 +171,11 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
     end
     cmd = `$gcc $win_arg $(incs) $(cfile) -o $(exe_file.buildfile) $rpath $flags`
     info(cmd)
-    run(setenv(cmd, ENV2))
+    try
+        run(setenv(cmd, ENV2))
+    catch
+        error("Could not execute $cmd")
+    end
 
     if delete_o_ji
         println("running: rm -rf $(tmpdir) $(sys.buildfile).o $(sys.inference).o $(sys.inference).ji $(sys.inference0).o $(sys.inference0).ji")
