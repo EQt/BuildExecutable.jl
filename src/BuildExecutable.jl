@@ -378,7 +378,8 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
             assert(atexit(&failed_warning) == 0);
 
             my_init_with_image(NULL, sysji_env == NULL ? sysji : sysji_env);
-
+            if (getenv("JL_INFO"))
+                fprintf(stderr, "my_init_finished\\n");
             // set Base.ARGS, not Core.ARGS
             if (jl_base_module != NULL) {
                 jl_array_t *args = (jl_array_t*)jl_get_global(jl_base_module, jl_symbol("ARGS"));
