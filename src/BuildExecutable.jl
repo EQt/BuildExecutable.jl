@@ -131,8 +131,10 @@ function build_executable(exename::String,
 
     emit_cmain(cfile, exename, targetdir != nothing, cpu_target=cpu_target)
     info("Created cfile $cfile")
-    emit_userimgjl(userimgjl, script_file)
-    info("Prepared userimg.jl $userimgjl")
+    if compile_sys
+        emit_userimgjl(userimgjl, script_file)
+        info("Prepared userimg.jl $userimgjl")
+    end
 
     gcc = find_system_gcc()
     win_arg = ``
