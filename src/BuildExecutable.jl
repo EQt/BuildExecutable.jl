@@ -322,8 +322,11 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
         {
             if (jl_is_initialized()) {
                 if (getenv("JL_INFO"))
-                    fprintf(stderr, "not initialized\\n");
+                    fprintf(stderr, "-- already initialized\\n");
                 return;
+            } else {
+                if (getenv("JL_INFO"))
+                    fprintf(stderr, "-- not initialized\\n");
             }
             if (getenv("JL_INFO")) {
                 fprintf(stderr, "isopenlibm() = %d\\n", isopenlibm());
