@@ -109,7 +109,7 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         for f in ["$(sys.buildfile).$(Libdl.dlext)"]
             if isfile(f)
                 f == "$(sys.buildfile).$(Libdl.dlext)" && static && continue
-                error("File '$(f)' already exists. Delete it or use --force.")
+                warn("File '$(f)' already exists. Delete it or use --force.")
             end
             let f = exe_file.buildfile
                 isfile(f) && warn("File '$(f)' already exists")
