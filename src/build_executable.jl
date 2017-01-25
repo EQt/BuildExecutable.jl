@@ -17,6 +17,7 @@ if !isinteractive()
         println("   --force          Set if you wish to overwrite existing files")
         println("   --static         Link the sysimage statically")
         println("   --gcc            All arguments hereafter are passed to the gcc linker")
+        println("   --sys            Compile sys.{so,dll,dynlib}")
         println("   --help           Print out this help text and exit")
         println()
         println(" Example:")
@@ -26,10 +27,12 @@ if !isinteractive()
 
     debug_flag = "--debug" in ARGS
     static_flag = "--static" in ARGS
+    force_flag = "--force" in ARGS
+    compile_sys = "--sys" in ARGS
     filter!(x -> x != "--static", ARGS)
     filter!(x -> x != "--debug", ARGS)
-    force_flag = "--force" in ARGS
     filter!(x -> x != "--force", ARGS)
+    filter!(x -> x != "--sys", ARGS)
     gcc_args = String[]
     i = findfirst(x -> x == "--gcc", ARGS)
     endi = length(ARGS)
@@ -39,5 +42,6 @@ if !isinteractive()
     end
     BuildExecutable.build_executable(ARGS[1:endi]..., force=force_flag,
                                      debug=debug_flag, static=static_flag,
-                                     gcc_args=gcc_args)
+                                     gcc_args=gcc_args,
+                                     compile_sys=compile_sys)
 end

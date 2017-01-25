@@ -64,9 +64,15 @@ type SysFile
 end
 
 """Build an executable out of a Julia script."""    
-function build_executable(exename, script_file, targetdir=nothing, cpu_target="native";
-                          force::Bool=false, debug::Bool=false, delete_o_ji::Bool=false,
-                          static::Bool=false, gcc_args::Vector{String}=[])
+function build_executable(exename::String,
+                          script_file::String,
+                          targetdir=nothing,
+                          cpu_target="native";
+                          force::Bool=false, debug::Bool=false,
+                          delete_o_ji::Bool=false,
+                          static::Bool=false,
+                          gcc_args::Vector{String}=[],
+                          compile_sys::Bool=false)
 
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(exesuff(julia))
@@ -146,23 +152,26 @@ function build_executable(exename, script_file, targetdir=nothing, cpu_target="n
         end
     end
 
-    # build_sysimg(sys.buildfile, cpu_target, userimgjl,
-    #              debug=debug, force=true, odir=targetdir)
-    sys_dl = joinpath(sys.libjulia, "julia", debug ? "sys-debug." :  "sys." * Libdl.dlext)
-    let out = "$(sys.buildfile).o"
-        if !isfile(out)
-            cmd = `-J $sys_dl --startup-file=no $script_file`
-            cmd = `$julia -C $cpu_target --output-o $out $cmd`
-            info(cmd)
-            run(cmd)
-        else
-            info("already exists: $out")
+    if compile_sys
+        build_sysimg(sys.buildfile, cpu_target, userimgjl,
+                     debug=debug, force=true, odir=targetdir)
+    else
+        sys_dl = joinpath(sys.libjulia, "julia",
+                          debug ? "sys-debug." :  "sys." * Libdl.dlext)
+        let out = "$(sys.buildfile).o"
+            if !isfile(out)
+                cmd = `-J $sys_dl --startup-file=no $script_file`
+                cmd = `$julia -C $cpu_target --output-o $out $cmd`
+                info(cmd)
+                run(cmd)
+            else
+                info("already exists: $out")
+            end
         end
+        cmd = `gcc $win_arg -shared $(sys.buildfile).o -o $(sys.buildfile).$(Libdl.dlext) -L$(sys.libjulia) $(exe_file.libjulia)`
+        info(cmd)
+        run(cmd)
     end
-    cmd = `gcc $win_arg -shared $(sys.buildfile).o -o $(sys.buildfile).$(Libdl.dlext) -L$(sys.libjulia) $(exe_file.libjulia)`
-    info(cmd)
-    run(cmd)
-
     rpath = `-Wl,-rpath,$(sys.libjulia) -Wl,-rpath,$(sys.libjulia*"/julia")`
     flags = if static
         `$(sys.buildfile).o -g -L$(sys.libjulia) $(exe_file.libjulia) -L$(sys.libjulia*"/julia") -lopenlibm`
