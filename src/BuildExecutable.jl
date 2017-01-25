@@ -72,7 +72,8 @@ function build_executable(exename::String,
                           delete_o_ji::Bool=false,
                           static::Bool=false,
                           gcc_args::Vector{String}=[],
-                          compile_sys::Bool=false)
+                          compile_sys::Bool=false,
+                          patch_libs::Bool=false)
 
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(exesuff(julia))
@@ -247,7 +248,9 @@ function build_executable(exename::String,
             # New implementation
             shlib = exe_file.filename
             @static if is_linux()
-                run(`$(patchelf) --set-rpath \$ORIGIN/ $(joinpath(targetdir, shlib))`)
+                if patch_libs
+                    run(`$(patchelf) --set-rpath \$ORIGIN/ $(joinpath(targetdir, shlib))`)
+                end
             end
             @static if is_apple()
                 # For debug purpose
