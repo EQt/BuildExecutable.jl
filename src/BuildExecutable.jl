@@ -281,7 +281,7 @@ function find_patchelf()
     end
 end
 
-function get_includes()
+function get_includes(additional_includes::Bool = false)
     ret = []
 
     # binary install
@@ -289,11 +289,12 @@ function get_includes()
     push!(ret, "-I$(incpath)")
 
     # Git checkout
-    julia_root = abspath(joinpath(JULIA_HOME, "..", ".."))
-    push!(ret, "-I$(julia_root)src")
-    push!(ret, "-I$(julia_root)src/support")
-    push!(ret, "-I$(julia_root)usr/include")
-
+    if additional_includes
+        julia_root = abspath(joinpath(JULIA_HOME, "..", ".."))
+        push!(ret, "-I$(julia_root)src")
+        push!(ret, "-I$(julia_root)src/support")
+        push!(ret, "-I$(julia_root)usr/include")
+    end
     ret
 end
 
