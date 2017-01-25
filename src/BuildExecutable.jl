@@ -335,6 +335,10 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
         void my_init_with_image(const char *julia_home_dir,
                                 const char *image_relative_path)
         {
+            if (getenv("JL_INFO"))
+                fprintf(stderr, "jl_init: home_dir %s, image_path %s\\n",
+                        julia_home_dir, image_relative_path);
+
             if (jl_is_initialized()) {
                 if (getenv("JL_INFO"))
                     fprintf(stderr, "-- already initialized\\n");
