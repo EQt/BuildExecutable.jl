@@ -396,6 +396,8 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
                     jl_arrayset(args, s, i - 1);
                 }
             }
+            if (getenv("JL_INFO"))
+                fprintf(stderr, "included ARGS\\n");
 
             $call_postinit
             // call main
