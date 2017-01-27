@@ -18,6 +18,7 @@ if !isinteractive()
         println("   --static         Link the sysimage statically")
         println("   --gcc            All arguments hereafter are passed to the gcc linker")
         println("   --sys            Compile sys.{so,dll,dynlib}")
+        println("   --post <file>    Include this file containing `postinit()` method")
         println("   --help           Print out this help text and exit")
         println()
         println(" Example:")
@@ -29,6 +30,14 @@ if !isinteractive()
     static_flag = "--static" in ARGS
     force_flag = "--force" in ARGS
     compile_sys = "--sys" in ARGS
+    post = ""
+    if "--post" in ARGS
+        i = findfirst(ARGS, "--post")
+        @assert i > 0
+        @assert i < length(ARGS)
+        post = ARGS[i+1]
+        deleteat!(ARGS, (i,i+1))
+    end
     filter!(x -> x != "--static", ARGS)
     filter!(x -> x != "--debug", ARGS)
     filter!(x -> x != "--force", ARGS)
@@ -43,5 +52,6 @@ if !isinteractive()
     BuildExecutable.build_executable(ARGS[1:endi]..., force=force_flag,
                                      debug=debug_flag, static=static_flag,
                                      gcc_args=gcc_args,
-                                     compile_sys=compile_sys)
+                                     compile_sys=compile_sys,
+                                     post=post)
 end

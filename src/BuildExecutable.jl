@@ -73,7 +73,8 @@ function build_executable(exename::String,
                           static::Bool=false,
                           gcc_args::Vector{String}=[],
                           compile_sys::Bool=false,
-                          patch_libs::Bool=false)
+                          patch_libs::Bool=false,
+                          post::String="")
 
     julia = abspath(joinpath(JULIA_HOME, debug ? "julia-debug" : "julia"))
     if !isfile(exesuff(julia))
@@ -130,7 +131,8 @@ function build_executable(exename::String,
 
     info("script_file : $script_file")
 
-    emit_cmain(cfile, exename, targetdir != nothing, cpu_target=cpu_target)
+    emit_cmain(cfile, exename, targetdir != nothing,
+               cpu_target=cpu_target, post=post)
     info("Created cfile $cfile")
     if compile_sys
         emit_userimgjl(userimgjl, script_file)
@@ -301,7 +303,8 @@ function get_includes(additional_includes::Bool = false)
     ret
 end
 
-function emit_cmain(cfile, exename, relocation; cpu_target="native")
+function emit_cmain(cfile, exename, relocation; cpu_target="native",
+                    post::String="")
     if relocation
         sysji = joinpath("lib"*exename)
     else
@@ -316,8 +319,13 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native")
         str = "jl_utf8_string_type"
     end
 
-    call_postinit = "postinit();\n"
-    define_postinit = "#include \"$(joinpath(dirname(@__FILE__), "..", "..", "build", "postinit.c"))\""
+    call_postinit = ""
+    define_postinit = ""
+    if length(post) > 0
+        call_postinit = "postinit();\n"
+        define_postinit = "#include \"$(post)\"\n"
+    end
+
     f = open(cfile, "w")
     write( f, """
         #include <julia.h>
