@@ -393,6 +393,14 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native",
             char *sysji_env = getenv("JULIA_SYSIMAGE");
             char mainfunc[] = "main()";
 
+            if (jl_ver_major() != JULIA_VERSION_MAJOR ||
+                jl_ver_major() != JULIA_VERSION_MINOR ||
+                jl_ver_major() != JULIA_VERSION_PATH) {
+                fprintf(stderr, "Compiled for %s != %s\n",
+                        JULIA_VERSION_STRING, jl_ver_string());
+                return -1;
+            }
+
             assert(atexit(&failed_warning) == 0);
 
             my_init_with_image(NULL, sysji_env == NULL ? sysji : sysji_env);
