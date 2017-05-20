@@ -394,10 +394,10 @@ function emit_cmain(cfile, exename, relocation; cpu_target="native",
             char mainfunc[] = "main()";
 
             if (jl_ver_major() != JULIA_VERSION_MAJOR ||
-                jl_ver_major() != JULIA_VERSION_MINOR ||
-                jl_ver_major() != JULIA_VERSION_PATH) {
-                fprintf(stderr, "Compiled for %s != %s\n",
-                        JULIA_VERSION_STRING, jl_ver_string());
+                jl_ver_minor() != JULIA_VERSION_MINOR ||
+                jl_ver_patch() != JULIA_VERSION_PATCH) {
+                fprintf(stderr, "Compiled for %s != " JULIA_VERSION_STRING "\\n",
+                        jl_ver_string());
                 return -1;
             }
 
